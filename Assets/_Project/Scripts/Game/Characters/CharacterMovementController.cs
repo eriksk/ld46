@@ -1,4 +1,5 @@
 using System;
+using LD46.Game.Characters.Grabbing;
 using UnityEngine;
 
 namespace LD46.Game.Characters
@@ -11,6 +12,12 @@ namespace LD46.Game.Characters
         public Transform TargetsRoot;
         public Animation Animator;
 
+        public Transform LeftHandEffector;
+        public Transform RightHandEffector;
+
+        public Transform LeftHandClickTarget;
+        public Transform RightHandClickTarget;
+
         [Header("Movement")]
         public float MovementSpeed = 1f;
         public float MovementDamping = 1f;
@@ -18,17 +25,30 @@ namespace LD46.Game.Characters
         public float JumpForce = 5f;
         public float ExtraGravity = 30f;
 
+        [Header("Input")]
+        public InputController InputController;
+
+        [Header("Grabbing")]
+        public GrabHandle LeftHandGrabHandle;
+        public GrabHandle RightHandGrabHandle;
+
         private Vector3 _movement;
         private string _currentAnimation;
+        private bool _leftHandUse, _rightHandUse;
 
         private void PlayAnim(string name)
         {
-            if(_currentAnimation == name) return;
+            if (_currentAnimation == name) return;
             _currentAnimation = name;
+
+            if (_currentAnimation == "swing")
+            {
+                return;
+            }
             Animator.CrossFade(_currentAnimation, 0.3f);
         }
 
-        void UpdateInput(Vector3 movement, bool jump)
+        public void UpdateInput(Vector3 movement, bool jump, bool leftHandUse, bool rightHandUse)
         {
             if (movement.magnitude > 0.3f)
             {
@@ -39,10 +59,13 @@ namespace LD46.Game.Characters
                 _movement = Vector3.zero;
             }
 
-            if(jump)
+            if (jump)
             {
                 Jump();
             }
+
+            _leftHandUse = leftHandUse;
+            _rightHandUse = rightHandUse;
         }
 
         private void Jump()
@@ -55,23 +78,9 @@ namespace LD46.Game.Characters
 
         void Update()
         {
-            var stick = new Vector3(
-                Input.GetAxis("Horizontal"),
-                0f,
-                Input.GetAxis("Vertical"));
-            var movement = Camera.main.transform.TransformDirection(stick);
-            movement.y = 0f;
-            if (stick.magnitude > 0.3f)
-            {
-                movement = movement.normalized * Mathf.Clamp01(stick.magnitude);
-            }
-            else
-            {
-                movement = Vector3.zero;
-            }
-            UpdateInput(movement, Input.GetButtonDown("Jump"));
+            InputController.OnUpdate(this);
 
-            if(_movement.magnitude > 0.3f)
+            if (_movement.magnitude > 0.3f)
             {
                 var movementDirection = _movement.normalized;
                 var lookRotation = Quaternion.LookRotation(movementDirection, Vector3.up);
@@ -86,6 +95,18 @@ namespace LD46.Game.Characters
             else
             {
                 PlayAnim("idle");
+            }
+        }
+
+        void LateUpdate()
+        {
+            if(_leftHandUse)
+            {
+                LeftHandEffector.position = LeftHandClickTarget.position;
+            }
+            if(_rightHandUse)
+            {
+                RightHandEffector.position = RightHandClickTarget.position;
             }
         }
 
