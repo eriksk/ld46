@@ -19,6 +19,20 @@ namespace LD46
             return f;
         }
 
+        public static T GetComponentInAnyParent<T>(this Transform transform) where T : Component
+        {
+            if(transform == null) return null;
+
+            var component = transform.GetComponent<T>();
+
+            if (component != null)
+            {
+                return component;
+            }
+
+            return GetComponentInAnyParent<T>(transform.parent);
+        }
+
         public static T GetComponentInChildrenDeep<T>(this Transform transform) where T : Component
         {
             var component = transform.GetComponent<T>();
@@ -43,7 +57,7 @@ namespace LD46
         public static IEnumerable<Transform> Parents(this Transform t)
         {
             if(t == null) return new Transform[0];
-            
+
             return new[]{ t }.Concat(Parents(t.parent));
         }
 
