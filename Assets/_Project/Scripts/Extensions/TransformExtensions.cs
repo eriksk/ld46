@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LD46
@@ -37,6 +38,13 @@ namespace LD46
                 }
             }
             return null;
+        }
+
+        public static IEnumerable<Transform> Parents(this Transform t)
+        {
+            if(t == null) return new Transform[0];
+            
+            return new[]{ t }.Concat(Parents(t.parent));
         }
 
         public static IEnumerable<Transform> Children(this Transform t)

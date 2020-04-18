@@ -100,13 +100,23 @@ namespace LD46.Game.Characters
 
         void LateUpdate()
         {
-            if(_leftHandUse)
+            if (_leftHandUse)
             {
                 LeftHandEffector.position = LeftHandClickTarget.position;
+                LeftHandGrabHandle.TryGrab();
             }
-            if(_rightHandUse)
+            else
+            {
+                LeftHandGrabHandle.Release();
+            }
+            if (_rightHandUse)
             {
                 RightHandEffector.position = RightHandClickTarget.position;
+                RightHandGrabHandle.TryGrab();
+            }
+            else
+            {
+                RightHandGrabHandle.Release();
             }
         }
 
